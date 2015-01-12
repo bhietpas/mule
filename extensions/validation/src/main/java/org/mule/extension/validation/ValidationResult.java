@@ -9,50 +9,41 @@ package org.mule.extension.validation;
 
 import org.mule.api.MuleEvent;
 
-import com.google.common.collect.ImmutableList;
-
 import java.io.Serializable;
-import java.util.List;
 
 public class ValidationResult implements Serializable
 {
 
     private final MuleEvent muleEvent;
-    private final List<String> messages;
+    private final Validator validator;
+    private final boolean error;
+    private final String message;
 
-    public ValidationResult(MuleEvent muleEvent, List<String> messages)
+    public ValidationResult(MuleEvent muleEvent, Validator validator, boolean error, String message)
     {
         this.muleEvent = muleEvent;
-        this.messages = messages != null ? ImmutableList.copyOf(messages) : ImmutableList.<String>of();
+        this.validator = validator;
+        this.error = error;
+        this.message = message;
     }
 
-    public List<String> getMessages()
+    public String getMessage()
     {
-        return messages;
+        return message;
     }
 
-    public boolean hasErrors()
+    public boolean isError()
     {
-        return !messages.isEmpty();
+        return error;
     }
 
-    @Override
-    public String toString()
+    public MuleEvent getMuleEvent()
     {
-        StringBuilder builder = new StringBuilder();
-        if (this.messages != null)
-        {
-            for (String message : this.messages)
-            {
-                if (builder.length() > 0)
-                {
-                    builder.append("\n");
-                }
+        return muleEvent;
+    }
 
-                builder.append(message);
-            }
-        }
-
-        return builder.toString();
+    public Validator getValidator()
+    {
+        return validator;
     }
 }

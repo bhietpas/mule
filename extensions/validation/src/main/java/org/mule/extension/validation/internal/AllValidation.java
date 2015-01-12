@@ -40,7 +40,7 @@ public class AllValidation extends ValidationSupport
             }
         }
 
-        ValidationResult result = new ValidationResult(muleEvent, messages);
+        ValidationResult result = null; //new ValidationResult(muleEvent, null, false, ""messages);
 
         if (throwsException)
         {

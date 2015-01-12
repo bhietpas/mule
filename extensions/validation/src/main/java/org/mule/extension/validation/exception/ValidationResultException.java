@@ -35,12 +35,6 @@ public class ValidationResultException extends MuleException
 
     private Message buildMessage()
     {
-        StringBuilder builder = new StringBuilder();
-        for (String message : this.validationResult.getMessages())
-        {
-            builder.append(message).append("\n");
-        }
-
-        return MessageFactory.createStaticMessage(builder.toString());
+        return MessageFactory.createStaticMessage(validationResult.getMessage());
     }
 }

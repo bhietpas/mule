@@ -7,6 +7,9 @@
 package org.mule.extension.validation.internal;
 
 import org.mule.extension.validation.Locale;
+import org.mule.extensions.annotations.Parameter;
+import org.mule.extensions.annotations.param.Optional;
+
 
 public final class NumberValidationOptions
 {
@@ -14,26 +17,35 @@ public final class NumberValidationOptions
     /**
      * Value to validate
      */
+    @Parameter
     private String value;
 
     /**
      * The locale to use for the format
      */
+    @Parameter
+    @Optional(defaultValue = "US")
     private Locale locale;
 
     /**
      * The pattern used to format the value
      */
+    @Parameter
+    @Optional
     private String pattern;
 
     /**
      * The minimum value
      */
+    @Parameter
+    @Optional
     private Double minValue;
 
     /**
      * The maximum value
      */
+    @Parameter
+    @Optional
     private Double maxValue;
 
 

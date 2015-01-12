@@ -40,18 +40,18 @@ public final class CommonValidations extends ValidationSupport
     /**
      * Validates that the given {@code value} is {@code true}
      *
-     * @param value the boolean to test
+     * @param expression the boolean to test
      * @throws Exception if the value is not {@code true}
      */
-    @Operation(name = "true")
-    public void isTrue(final boolean value) throws Exception
+    @Operation
+    public void isTrue(final boolean expression) throws Exception
     {
         validateWith(new Validator()
         {
             @Override
             public boolean isValid()
             {
-                return value;
+                return expression;
             }
 
             @Override
@@ -65,18 +65,18 @@ public final class CommonValidations extends ValidationSupport
     /**
      * Validates that the given {@code value} is {@code false}
      *
-     * @param value the boolean to test
+     * @param expression the boolean to test
      * @throws Exception if the value is not {@code true}
      */
-    @Operation(name = "false")
-    public void isFalse(final boolean value) throws Exception
+    @Operation
+    public void isFalse(final boolean expression) throws Exception
     {
         validateWith(new Validator()
         {
             @Override
             public boolean isValid()
             {
-                return !value;
+                return !expression;
             }
 
             @Override
@@ -123,7 +123,7 @@ public final class CommonValidations extends ValidationSupport
      * @param pattern the pattern for the {@code date}
      */
     @Operation
-    public void date(final String date, final Locale locale, final String pattern) throws Exception
+    public void date(final String date, @Optional(defaultValue = "US") final Locale locale, final String pattern) throws Exception
     {
         validateWith(new Validator()
         {
@@ -182,7 +182,7 @@ public final class CommonValidations extends ValidationSupport
      *
      * @param options the number options
      */
-    @Operation(name = "double")
+    @Operation
     public void isDouble(NumberValidationOptions options) throws Exception
     {
         validateWith(new NumberValidator(options)
@@ -237,7 +237,7 @@ public final class CommonValidations extends ValidationSupport
      *
      * @param options the number options
      */
-    @Operation(name = "float")
+    @Operation
     public void isFloat(NumberValidationOptions options) throws Exception
     {
         validateWith(new NumberValidator(options)
@@ -267,7 +267,7 @@ public final class CommonValidations extends ValidationSupport
      *
      * @param options the number options
      */
-    @Operation(name = "integer")
+    @Operation
     public void isInteger(NumberValidationOptions options) throws Exception
     {
         validateWith(new NumberValidator(options)
@@ -413,7 +413,7 @@ public final class CommonValidations extends ValidationSupport
      *
      * @param options the number options
      */
-    @Operation(name = "long")
+    @Operation
     public void isLong(NumberValidationOptions options) throws Exception
     {
         validateWith(new NumberValidator(options)
@@ -543,7 +543,7 @@ public final class CommonValidations extends ValidationSupport
      *
      * @param value the value to test
      */
-    @Operation(name = "null")
+    @Operation
     public void isNull(final Object value) throws Exception
     {
         validateWith(new Validator()
@@ -567,7 +567,7 @@ public final class CommonValidations extends ValidationSupport
      *
      * @param options the number options
      */
-    @Operation(name = "short")
+    @Operation
     public void isShort(NumberValidationOptions options) throws Exception
     {
         validateWith(new NumberValidator(options)
@@ -601,7 +601,7 @@ public final class CommonValidations extends ValidationSupport
      * @param pattern the pattern for the {@code date}
      */
     @Operation
-    public void time(final String time, final Locale locale, @Optional final String pattern) throws Exception
+    public void time(final String time, @Optional(defaultValue = "US") final Locale locale, @Optional final String pattern) throws Exception
     {
         validateWith(new Validator()
         {
