@@ -117,7 +117,8 @@
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    <xs:element xmlns="http://www.mulesoft.org/schema/mule/extension/heisenberg" xmlns:mule="http://www.mulesoft.org/schema/mule/core" type="AliasType" substitutionGroup="mule:abstract-message-processor" name="alias"></xs:element>
+    <xs:element xmlns:mule="http://www.mulesoft.org/schema/mule/core" substitutionGroup="mule:abstract-message-processor" abstract="true" name="heisenberg-empire"></xs:element>
+    <xs:element xmlns="http://www.mulesoft.org/schema/mule/extension/heisenberg" type="AliasType" substitutionGroup="heisenberg-empire" name="alias"></xs:element>
     <xs:complexType name="AliasType">
         <xs:complexContent>
             <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractMessageProcessorType">

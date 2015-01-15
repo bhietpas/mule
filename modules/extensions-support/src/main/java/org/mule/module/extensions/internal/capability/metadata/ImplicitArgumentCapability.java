@@ -4,15 +4,16 @@
  * license, a copy of which has been included with this distribution in the
  * LICENSE.txt file.
  */
-package org.mule.module.extensions.internal.capability;
+package org.mule.module.extensions.internal.capability.metadata;
 
 /**
- * A metadata capability to signal that a given component should not
- * be advertised
+ * A metadata capability to signal that a given parameter
+ * will be provided implicitly and should not be used
+ * when invoking an operation method.
  *
  * @since 3.7.0
  */
-public final class HiddenCapability
+public class ImplicitArgumentCapability
 {
 
 }

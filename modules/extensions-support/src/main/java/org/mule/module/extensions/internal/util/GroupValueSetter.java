@@ -12,7 +12,7 @@ import org.mule.VoidMuleEvent;
 import org.mule.api.MuleException;
 import org.mule.extensions.annotations.Parameters;
 import org.mule.extensions.introspection.Capable;
-import org.mule.module.extensions.internal.capability.ParameterGroupCapability;
+import org.mule.module.extensions.internal.capability.metadata.ParameterGroupCapability;
 import org.mule.module.extensions.internal.introspection.ParameterGroup;
 import org.mule.module.extensions.internal.runtime.DefaultObjectBuilder;
 import org.mule.module.extensions.internal.runtime.ObjectBuilder;

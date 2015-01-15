@@ -10,7 +10,7 @@ import static org.mule.util.Preconditions.checkArgument;
 import org.mule.extensions.introspection.Capable;
 import org.mule.extensions.introspection.Parameter;
 import org.mule.extensions.introspection.declaration.Declaration;
-import org.mule.module.extensions.internal.capability.ParameterGroupCapability;
+import org.mule.module.extensions.internal.capability.metadata.ParameterGroupCapability;
 import org.mule.module.extensions.internal.util.CapabilityUtils;
 
 import com.google.common.collect.ImmutableMap;

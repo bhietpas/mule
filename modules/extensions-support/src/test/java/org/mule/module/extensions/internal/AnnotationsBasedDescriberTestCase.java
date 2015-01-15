@@ -8,8 +8,11 @@ package org.mule.module.extensions.internal;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.mule.extensions.annotations.Extension.DEFAULT_CONFIG_NAME;
 import static org.mule.module.extensions.HeisenbergExtension.AGE;
@@ -37,12 +40,14 @@ import org.mule.module.extensions.HeisenbergAliasOperations;
 import org.mule.module.extensions.HeisenbergExtension;
 import org.mule.module.extensions.HeisenbergOperations;
 import org.mule.module.extensions.Ricin;
+import org.mule.module.extensions.internal.capability.metadata.ImplementedTypeCapability;
 import org.mule.module.extensions.internal.introspection.AnnotationsBasedDescriber;
 import org.mule.tck.junit4.AbstractMuleTestCase;
 import org.mule.tck.size.SmallTest;
 import org.mule.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -128,6 +133,28 @@ public class AnnotationsBasedDescriberTestCase extends AbstractMuleTestCase
     public void heisenbergWithOperationsConfig() throws Exception
     {
         describerFor(HeisenbergWithOperations.class).describe();
+    }
+
+    @Test
+    public void aliasImplementsOperations() throws Exception
+    {
+        Declaration declaration = describer.describe().getRootConstruct().getDeclaration();
+        OperationDeclaration operation = getOperation(declaration, "alias");
+        assertThat(operation.getCapabilities(), is(not(emptyIterable())));
+
+        List<ImplementedTypeCapability> capabilities = new ArrayList<>();
+
+        for (Object object : operation.getCapabilities())
+        {
+            if (object instanceof ImplementedTypeCapability)
+            {
+                capabilities.add((ImplementedTypeCapability) object);
+            }
+        }
+
+        assertThat(capabilities, hasSize(1));
+        ImplementedTypeCapability capability = capabilities.get(0);
+        assertSame(capability.getType(), HeisenbergOperations.class);
     }
 
     private void assertTestModuleConfiguration(Declaration declaration) throws Exception
@@ -322,5 +349,4 @@ public class AnnotationsBasedDescriberTestCase extends AbstractMuleTestCase
             this.extendedProperty = extendedProperty;
         }
     }
-
 }

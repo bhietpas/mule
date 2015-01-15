@@ -10,6 +10,7 @@ import org.mule.api.MuleEvent;
 import org.mule.api.MuleMessage;
 import org.mule.api.NestedProcessor;
 import org.mule.api.transport.PropertyScope;
+import org.mule.extensions.annotations.Extensible;
 import org.mule.extensions.annotations.Operation;
 import org.mule.extensions.annotations.WithConfig;
 import org.mule.extensions.annotations.param.Optional;
@@ -20,6 +21,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+@Extensible(alias = "heisenberg-empire")
 public class HeisenbergOperations
 {
 

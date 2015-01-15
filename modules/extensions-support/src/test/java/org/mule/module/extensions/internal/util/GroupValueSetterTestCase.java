@@ -14,7 +14,7 @@ import static org.mule.module.extensions.internal.util.IntrospectionUtils.getSet
 import org.mule.module.extensions.ExtendedPersonalInfo;
 import org.mule.module.extensions.HeisenbergExtension;
 import org.mule.module.extensions.LifetimeInfo;
-import org.mule.module.extensions.internal.capability.ParameterGroupCapability;
+import org.mule.module.extensions.internal.capability.metadata.ParameterGroupCapability;
 import org.mule.module.extensions.internal.introspection.ParameterGroup;
 import org.mule.module.extensions.internal.runtime.resolver.ResolverSetResult;
 import org.mule.tck.junit4.AbstractMuleTestCase;

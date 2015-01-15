@@ -6,6 +6,7 @@
  */
 package org.mule.module.extensions;
 
+import org.mule.extensions.annotations.ImplementationOf;
 import org.mule.extensions.annotations.Operation;
 import org.mule.extensions.annotations.Parameters;
 
@@ -16,6 +17,7 @@ public class HeisenbergAliasOperations
     private PersonalInfo personalInfo;
 
     @Operation
+    @ImplementationOf(HeisenbergOperations.class)
     public String alias()
     {
         return String.format("Hello, my name is %s. I'm %d years old", personalInfo.getMyName(), personalInfo.getAge());

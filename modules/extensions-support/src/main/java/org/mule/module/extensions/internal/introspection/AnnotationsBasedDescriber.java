@@ -18,6 +18,7 @@ import org.mule.api.registry.SPIServiceRegistry;
 import org.mule.extensions.annotations.Configuration;
 import org.mule.extensions.annotations.Configurations;
 import org.mule.extensions.annotations.Extension;
+import org.mule.extensions.annotations.ImplementationOf;
 import org.mule.extensions.annotations.Operations;
 import org.mule.extensions.annotations.Parameter;
 import org.mule.extensions.annotations.param.Optional;
@@ -30,9 +31,10 @@ import org.mule.extensions.introspection.declaration.OperationConstruct;
 import org.mule.extensions.introspection.declaration.ParameterConstruct;
 import org.mule.extensions.introspection.declaration.ParameterDeclaration;
 import org.mule.extensions.introspection.declaration.WithParameters;
-import org.mule.module.extensions.internal.capability.HiddenCapability;
-import org.mule.module.extensions.internal.capability.ImplicitArgumentCapability;
-import org.mule.module.extensions.internal.capability.ParameterGroupCapability;
+import org.mule.module.extensions.internal.capability.metadata.HiddenCapability;
+import org.mule.module.extensions.internal.capability.metadata.ImplementedTypeCapability;
+import org.mule.module.extensions.internal.capability.metadata.ImplicitArgumentCapability;
+import org.mule.module.extensions.internal.capability.metadata.ParameterGroupCapability;
 import org.mule.module.extensions.internal.runtime.TypeAwareOperationImplementation;
 import org.mule.module.extensions.internal.util.IntrospectionUtils;
 import org.mule.util.CollectionUtils;
@@ -217,6 +219,22 @@ public final class AnnotationsBasedDescriber implements Describer
                     .implementedIn(new TypeAwareOperationImplementation(actingClass, method));
 
             declareOperationParameters(actingClass, method, operation);
+
+            calculateImplementedTypes(actingClass, method, operation);
+        }
+    }
+
+    private void calculateImplementedTypes(Class<?> actingClass, Method method, OperationConstruct operation)
+    {
+        ImplementationOf implementation = method.getAnnotation(ImplementationOf.class);
+        if (implementation == null)
+        {
+            implementation = actingClass.getAnnotation(ImplementationOf.class);
+        }
+
+        if (implementation != null)
+        {
+            operation.withCapability(new ImplementedTypeCapability(implementation.value()));
         }
     }
 

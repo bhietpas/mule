@@ -19,7 +19,7 @@ import org.mule.api.lifecycle.Stoppable;
 import org.mule.extensions.introspection.OperationContext;
 import org.mule.extensions.introspection.OperationImplementation;
 import org.mule.extensions.introspection.Parameter;
-import org.mule.module.extensions.internal.capability.ImplicitArgumentCapability;
+import org.mule.module.extensions.internal.capability.metadata.ImplicitArgumentCapability;
 import org.mule.module.extensions.internal.runtime.resolver.ResolverSetResult;
 import org.mule.module.extensions.internal.util.ValueSetter;
 import org.mule.repackaged.internal.org.springframework.util.ReflectionUtils;

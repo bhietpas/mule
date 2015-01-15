@@ -9,17 +9,29 @@ package org.mule.module.extensions.internal.capability.xml.schema;
 import static org.apache.commons.lang.StringUtils.EMPTY;
 import static org.mule.extensions.introspection.DataQualifier.LIST;
 import static org.mule.extensions.introspection.DataQualifier.OPERATION;
+import static org.mule.module.extensions.internal.capability.xml.schema.model.SchemaConstants.ATTRIBUTE_DESCRIPTION_CONFIG;
+import static org.mule.module.extensions.internal.capability.xml.schema.model.SchemaConstants.ATTRIBUTE_NAME_CONFIG;
+import static org.mule.module.extensions.internal.capability.xml.schema.model.SchemaConstants.ATTRIBUTE_NAME_VALUE;
+import static org.mule.module.extensions.internal.capability.xml.schema.model.SchemaConstants.MULE_ABSTRACT_EXTENSION;
+import static org.mule.module.extensions.internal.capability.xml.schema.model.SchemaConstants.MULE_ABSTRACT_EXTENSION_TYPE;
+import static org.mule.module.extensions.internal.capability.xml.schema.model.SchemaConstants.MULE_ABSTRACT_MESSAGE_PROCESSOR;
+import static org.mule.module.extensions.internal.capability.xml.schema.model.SchemaConstants.OPERATION_SUBSTITUTION_GROUP_SUFFIX;
+import static org.mule.module.extensions.internal.capability.xml.schema.model.SchemaConstants.SUBSTITUTABLE_NAME;
+import static org.mule.module.extensions.internal.util.CapabilityUtils.getSingleCapability;
 import static org.mule.module.extensions.internal.util.IntrospectionUtils.isDynamic;
 import static org.mule.module.extensions.internal.util.IntrospectionUtils.isIgnored;
 import static org.mule.module.extensions.internal.util.IntrospectionUtils.isRequired;
 import static org.mule.module.extensions.internal.util.NameUtils.getGlobalPojoTypeName;
+import static org.mule.util.Preconditions.checkArgument;
+import org.mule.extensions.annotations.Extensible;
 import org.mule.extensions.introspection.Configuration;
 import org.mule.extensions.introspection.DataQualifier;
 import org.mule.extensions.introspection.DataType;
 import org.mule.extensions.introspection.Extension;
 import org.mule.extensions.introspection.Operation;
 import org.mule.extensions.introspection.Parameter;
-import org.mule.module.extensions.internal.capability.HiddenCapability;
+import org.mule.module.extensions.internal.capability.metadata.HiddenCapability;
+import org.mule.module.extensions.internal.capability.metadata.ImplementedTypeCapability;
 import org.mule.module.extensions.internal.capability.xml.schema.model.Annotation;
 import org.mule.module.extensions.internal.capability.xml.schema.model.Attribute;
 import org.mule.module.extensions.internal.capability.xml.schema.model.ComplexContent;
@@ -75,6 +87,7 @@ public class SchemaBuilder
 
     private Set<DataType> registeredEnums;
     private Map<DataType, ComplexTypeHolder> registeredComplexTypesHolders;
+    private Set<String> substitutionGroups = new HashSet<>();
     private Schema schema;
     private ObjectFactory objectFactory;
 
@@ -196,7 +209,7 @@ public class SchemaBuilder
     public SchemaBuilder registerOperation(Operation operation)
     {
         String typeName = StringUtils.capitalize(operation.getName()) + SchemaConstants.TYPE_SUFFIX;
-        registerProcessorElement(operation.getName(), typeName, operation.getDescription());
+        registerProcessorElement(operation, typeName);
         registerProcessorType(typeName, operation);
 
         return this;
@@ -242,7 +255,7 @@ public class SchemaBuilder
         complexType.setComplexContent(complexContent);
 
         final ExtensionType extension = new ExtensionType();
-        extension.setBase(SchemaConstants.MULE_ABSTRACT_EXTENSION_TYPE);
+        extension.setBase(MULE_ABSTRACT_EXTENSION_TYPE);
         complexContent.setExtension(extension);
 
         final ExplicitGroup all = new ExplicitGroup();
@@ -372,7 +385,7 @@ public class SchemaBuilder
         complexContent.getComplexContent().getExtension().getAttributeOrAttributeGroup().add(createNameAttribute());
         objectElement.setComplexType(complexContent);
 
-        objectElement.setSubstitutionGroup(SchemaConstants.MULE_ABSTRACT_EXTENSION);
+        objectElement.setSubstitutionGroup(MULE_ABSTRACT_EXTENSION);
         objectElement.setAnnotation(createDocAnnotation(description));
 
         schema.getSimpleTypeOrComplexTypeOrGroup().add(objectElement);
@@ -396,7 +409,7 @@ public class SchemaBuilder
 
         Element extension = new TopLevelElement();
         extension.setName(name);
-        extension.setSubstitutionGroup(SchemaConstants.MULE_ABSTRACT_EXTENSION);
+        extension.setSubstitutionGroup(MULE_ABSTRACT_EXTENSION);
         extension.setComplexType(complexType);
 
         extension.getOtherAttributes().putAll(otherAttributes);
@@ -404,7 +417,7 @@ public class SchemaBuilder
         ComplexContent complexContent = new ComplexContent();
         complexType.setComplexContent(complexContent);
         ExtensionType complexContentExtension = new ExtensionType();
-        complexContentExtension.setBase(SchemaConstants.MULE_ABSTRACT_EXTENSION_TYPE);
+        complexContentExtension.setBase(MULE_ABSTRACT_EXTENSION_TYPE);
         complexContent.setExtension(complexContentExtension);
 
         schema.getSimpleTypeOrComplexTypeOrGroup().add(extension);
@@ -518,7 +531,7 @@ public class SchemaBuilder
         simpleContentExtension.setBase(extensionBase);
         simpleContent.setExtension(simpleContentExtension);
 
-        Attribute valueAttribute = createAttribute(SchemaConstants.ATTRIBUTE_NAME_VALUE, type, true, true);
+        Attribute valueAttribute = createAttribute(ATTRIBUTE_NAME_VALUE, type, true, true);
         simpleContentExtension.getAttributeOrAttributeGroup().add(valueAttribute);
 
         return complexType;
@@ -529,17 +542,53 @@ public class SchemaBuilder
         return ArrayUtils.isEmpty(type.getGenericTypes()) ? type : type.getGenericTypes()[0];
     }
 
-    private void registerProcessorElement(String name, String typeName, String docText)
+    private void registerProcessorElement(Operation operation, String typeName)
     {
         Element element = new TopLevelElement();
-        element.setName(NameUtils.hyphenize(name));
+        element.setName(NameUtils.hyphenize(operation.getName()));
         element.setType(new QName(schema.getTargetNamespace(), typeName));
-        element.setAnnotation(createDocAnnotation(docText));
-        element.setSubstitutionGroup(SchemaConstants.MULE_ABSTRACT_MESSAGE_PROCESSOR);
+        element.setAnnotation(createDocAnnotation(operation.getDescription()));
+        element.setSubstitutionGroup(getOperationSubstitutionGroup(operation));
         schema.getSimpleTypeOrComplexTypeOrGroup().add(element);
     }
 
-    private void registerExtendedType(QName base, String name, List<Parameter> parameters)
+    private QName getOperationSubstitutionGroup(Operation operation)
+    {
+        QName substitutionGroup = MULE_ABSTRACT_MESSAGE_PROCESSOR;
+        ImplementedTypeCapability implementation = getSingleCapability(operation, ImplementedTypeCapability.class);
+        if (implementation != null)
+        {
+            substitutionGroup = new QName(schema.getTargetNamespace(), registerExtensibleElement(implementation.getType()));
+        }
+
+        return substitutionGroup;
+    }
+
+    private String registerExtensibleElement(Class<?> type)
+    {
+        Extensible extensible = type.getAnnotation(Extensible.class);
+        checkArgument(extensible != null, String.format("Type %s is not extensible", type.getName()));
+
+        String name = extensible.alias();
+        if (StringUtils.isBlank(name))
+        {
+            name = type.getName() + OPERATION_SUBSTITUTION_GROUP_SUFFIX;
+        }
+
+        if (substitutionGroups.add(name))
+        {
+            TopLevelElement element = new TopLevelElement();
+            element.setName(name);
+            element.setAbstract(true);
+            element.setSubstitutionGroup(MULE_ABSTRACT_MESSAGE_PROCESSOR);
+
+            schema.getSimpleTypeOrComplexTypeOrGroup().add(element);
+        }
+
+        return name;
+    }
+
+    private void registerOperationType(QName base, String name, List<Parameter> parameters)
     {
         TopLevelComplexType complexType = new TopLevelComplexType();
         complexType.setName(name);
@@ -550,7 +599,7 @@ public class SchemaBuilder
         complexContentExtension.setBase(base);
         complexContent.setExtension(complexContentExtension);
 
-        Attribute configAttr = createAttribute(SchemaConstants.ATTRIBUTE_NAME_CONFIG, SchemaConstants.ATTRIBUTE_DESCRIPTION_CONFIG, false, SchemaConstants.SUBSTITUTABLE_NAME);
+        Attribute configAttr = createAttribute(ATTRIBUTE_NAME_CONFIG, ATTRIBUTE_DESCRIPTION_CONFIG, false, SUBSTITUTABLE_NAME);
         complexContentExtension.getAttributeOrAttributeGroup().add(configAttr);
 
         final ExplicitGroup all = new ExplicitGroup();
@@ -617,7 +666,7 @@ public class SchemaBuilder
 
     private void registerProcessorType(String name, Operation operation)
     {
-        registerExtendedType(SchemaConstants.MULE_ABSTRACT_MESSAGE_PROCESSOR_TYPE, name, operation.getParameters());
+        registerOperationType(SchemaConstants.MULE_ABSTRACT_MESSAGE_PROCESSOR_TYPE, name, operation.getParameters());
     }
 
     private void generateNestedProcessorElement(ExplicitGroup all, String name, String description, boolean required, String maxOccurs)
